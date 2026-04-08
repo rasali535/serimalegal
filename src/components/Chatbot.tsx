@@ -1,31 +1,44 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Loader2 } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
-
-// Initialize Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import { MessageSquare, X, Send, Search } from 'lucide-react';
 
 type Message = {
   role: 'user' | 'model';
   content: string;
 };
 
-const SYSTEM_PROMPT = `You are the Serima Legal Assistant, a sophisticated AI agent for Serima Legal Practice. Your goal is to provide general information about the firm's services and basic legal concepts in Botswana.
-
-Guidelines:
-Identity: Always identify as an AI assistant for Serima Legal Practice.
-Context: Use the knowledge base provided (Botswana Employment Act, Deeds Registry procedures, and firm service descriptions).
-Disclaimer: You must include a disclaimer if asked for specific legal advice: 'I am an AI assistant and cannot provide binding legal advice. For a formal legal opinion, please schedule a consultation with our attorneys.'
-Lead Gen: If a user describes a legal problem (e.g., 'I haven't been paid by my employer'), provide a brief overview of the process in Botswana and then encourage them to 'Book a Consultation' via the contact form link (/contact).
-Tone: Formal, empathetic, and professional.`;
+const KNOWLEDGE_BASE = [
+  {
+    keywords: ['conveyancing', 'property', 'deed', 'plot', 'house'],
+    answer: "Our Conveyancing & Property department handles all aspects of property law in Botswana. We assist with property transfers, bonds, leases, and navigating the Deeds Registry. For specific advice, please book a consultation."
+  },
+  {
+    keywords: ['commercial', 'corporate', 'business', 'company', 'contract'],
+    answer: "Serima Legal provides comprehensive Corporate & Commercial services, including company formation, contract drafting, and regulatory compliance. We help businesses operate legally and efficiently within Botswana's framework."
+  },
+  {
+    keywords: ['litigation', 'court', 'sue', 'lawsuit'],
+    answer: "We handle Civil Litigation in both the Magistrates Court and High Court of Botswana. Our team is experienced in debt recovery, family law disputes, and general civil claims."
+  },
+  {
+    keywords: ['labour', 'employment', 'employer', 'dismissed', 'wages'],
+    answer: "Under the Botswana Employment Act, we assist clients with unfair dismissal cases, wage disputes, and labour relations. We can represent you at the Labour Office or Industrial Court."
+  },
+  {
+    keywords: ['contact', 'address', 'location', 'where'],
+    answer: "We are located at Plot 23891, Sesase Road, Gaborone, Botswana. You can reach us at info@serimalegal.co.bw or +267 390 0000. You can also use our contact page to book an appointment."
+  },
+  {
+    keywords: ['fee', 'cost', 'charge', 'expensive'],
+    answer: "Our fees vary depending on the complexity of the matter. We offer competitive rates and transparent billing. We recommend a consultation to discuss your specific needs and receive a fee estimate."
+  }
+];
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', content: 'Welcome to Serima Legal Practice. I am the Serima Legal Assistant. How may I assist you today?' }
+    { role: 'model', content: 'Welcome to Serima Legal Practice. I am here to help you navigate our services. What can I assist you with today?' }
   ]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -36,41 +49,27 @@ export default function Chatbot() {
     scrollToBottom();
   }, [messages, isOpen]);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
 
     const userMessage = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setIsLoading(true);
 
-    try {
-      // Format history for Gemini
-      const history = messages.map(msg => ({
-        role: msg.role === 'model' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }));
+    // Simulated short delay
+    setTimeout(() => {
+      const lowerMsg = userMessage.toLowerCase();
+      let bestAnswer = "I'm sorry, I don't have information on that specific topic. Would you like to reach our office directly or book a consultation via our contact page (/contact)?";
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          ...history,
-          { role: 'user', parts: [{ text: userMessage }] }
-        ],
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          temperature: 0.3,
+      for (const entry of KNOWLEDGE_BASE) {
+        if (entry.keywords.some(k => lowerMsg.includes(k))) {
+          bestAnswer = entry.answer;
+          break;
         }
-      });
+      }
 
-      const text = response.text || "I'm sorry, I couldn't process that request.";
-      setMessages(prev => [...prev, { role: 'model', content: text }]);
-    } catch (error) {
-      console.error('Error generating response:', error);
-      setMessages(prev => [...prev, { role: 'model', content: 'I apologize, but I am currently experiencing technical difficulties. Please try again later or contact our office directly.' }]);
-    } finally {
-      setIsLoading(false);
-    }
+      setMessages(prev => [...prev, { role: 'model', content: bestAnswer }]);
+    }, 500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -80,6 +79,13 @@ export default function Chatbot() {
     }
   };
 
+  const quickQuestions = [
+    "Property Law",
+    "Labour Law",
+    "Company Registration",
+    "Contact Details"
+  ];
+
   return (
     <>
       {/* Chat Toggle Button */}
@@ -87,7 +93,7 @@ export default function Chatbot() {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 bg-navy text-gold p-4 rounded-full shadow-2xl hover:bg-navy-light transition-colors z-40 flex items-center justify-center border-2 border-gold"
-          aria-label="Open legal assistant chat"
+          aria-label="Open information assistant"
         >
           <MessageSquare className="h-6 w-6" />
         </button>
@@ -99,8 +105,8 @@ export default function Chatbot() {
           {/* Header */}
           <div className="bg-navy text-white p-4 flex justify-between items-center border-b-2 border-gold">
             <div className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5 text-gold" />
-              <span className="font-serif font-bold">Serima Legal Assistant</span>
+              <img src="/logo_white.png" alt="" className="h-6 w-auto" />
+              <span className="font-serif font-bold text-sm">Knowledge Base Assistant</span>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
@@ -124,12 +130,20 @@ export default function Chatbot() {
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               </div>
             ))}
-            {isLoading && (
-              <div className="bg-white border border-gray-200 text-gray-800 self-start rounded-lg rounded-tl-none shadow-sm p-3 max-w-[85%]">
-                <Loader2 className="h-5 w-5 animate-spin text-navy" />
-              </div>
-            )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Links */}
+          <div className="px-4 py-2 border-t border-gray-100 flex flex-wrap gap-2">
+            {quickQuestions.map((q) => (
+              <button
+                key={q}
+                onClick={() => setInput(q)}
+                className="text-[10px] bg-gray-200 hover:bg-gray-300 text-charcoal px-2 py-1 rounded transition-colors"
+              >
+                {q}
+              </button>
+            ))}
           </div>
 
           {/* Input Area */}
@@ -139,20 +153,20 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask a legal question..."
+                placeholder="Type your question..."
                 className="flex-grow resize-none border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy min-h-[40px] max-h-[120px]"
                 rows={1}
               />
               <button
                 onClick={handleSend}
-                disabled={!input.trim() || isLoading}
+                disabled={!input.trim()}
                 className="bg-gold text-navy p-2 rounded-md hover:bg-yellow-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
                 <Send className="h-5 w-5" />
               </button>
             </div>
             <div className="text-[10px] text-center text-gray-400 mt-2">
-              AI Assistant. Cannot provide binding legal advice.
+              Formal legal opinions require direct consultation.
             </div>
           </div>
         </div>

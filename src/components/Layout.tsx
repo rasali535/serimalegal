@@ -24,11 +24,8 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <Scale className="h-8 w-8 text-gold" />
-              <span className="font-serif text-2xl font-bold tracking-wide text-white">
-                Serima <span className="text-gold">Legal</span>
-              </span>
+            <Link to="/" className="flex items-center space-x-3">
+              <img src="/logo_white.png" alt="Serima Legal Logo" className="h-16 w-auto" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -37,9 +34,8 @@ export default function Layout() {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-gold ${
-                    isActive(link.path) ? 'text-gold border-b-2 border-gold pb-1' : 'text-gray-300'
-                  }`}
+                  className={`text-sm font-medium transition-colors hover:text-gold ${isActive(link.path) ? 'text-gold border-b-2 border-gold pb-1' : 'text-gray-300'
+                    }`}
                 >
                   {link.name}
                 </Link>
@@ -77,11 +73,10 @@ export default function Layout() {
                   key={link.name}
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    isActive(link.path)
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(link.path)
                       ? 'bg-navy text-gold'
                       : 'text-gray-300 hover:bg-navy hover:text-white'
-                  }`}
+                    }`}
                 >
                   {link.name}
                 </Link>
@@ -108,11 +103,8 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Scale className="h-6 w-6 text-gold" />
-                <span className="font-serif text-xl font-bold text-white">
-                  Serima <span className="text-gold">Legal Practice</span>
-                </span>
+              <div className="flex items-center space-x-3 mb-4">
+                <img src="/logo_white.png" alt="Serima Legal Logo" className="h-10 w-auto" />
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Precision in Legal Advocacy. Integrity in Service. Providing accessible legal excellence in Gaborone, Botswana.
@@ -138,7 +130,17 @@ export default function Layout() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Serima Legal Practice. All rights reserved.
+            <p>&copy; {new Date().getFullYear()} Serima Legal Practice. All rights reserved.</p>
+            <p className="mt-2 text-xs">
+              Site by <a 
+                href="http://www.rasalibassist.themaplin.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gold hover:text-yellow-400 underline underline-offset-4 transition-colors"
+              >
+                Ras Ali web developer
+              </a>
+            </p>
           </div>
         </div>
       </footer>
