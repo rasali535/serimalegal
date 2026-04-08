@@ -8,7 +8,7 @@ Professional, sophisticated, and authoritative legal solutions in Botswana.
 
 ## Developer
 
-Developed by [Ras Ali web developer](http://www.rasalibassist.themaplin.com)
+Developed by [Ras Ali](http://www.rasalibassist.themaplin.com)
 
 ## Run Locally
 
